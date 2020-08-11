@@ -6,8 +6,8 @@
 
 
 chrome.runtime.onInstalled.addListener(function() {
-  chrome.storage.sync.set({hide: true}, function() {
-    console.log("Hide image is on");
+  chrome.storage.sync.set({hide: true, storedResponseTime: 250}, function() {
+    console.log("Skip ads background js is on");
   });
 });
 

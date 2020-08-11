@@ -1,41 +1,64 @@
+var responseTime = 100;
+var shouldHide = false;
+var executable = null;
 
-//find all the image in answer feed,thumbnail and ad feeds and add blurclasses
-var blurImage = function(){
-}
+var addListeners = function () {
+    executable = setInterval(function () {
+        var selection = document.querySelector('.videoAdUiSkipButton,.ytp-ad-skip-button');
+        if (selection) {
+            selection.click();
+        }
+    }, responseTime);
+};
 
-//find all the image in answer feed,thumbnail and ad feeds and remove blurclasses
-var unblurImage=function(){
-}
-
-var addListeners=function(){
-    setInterval(function () {
-      var selection = document.querySelector('.videoAdUiSkipButton,.ytp-ad-skip-button');
-      if (selection) {
-        selection.click();
-      }
-    }, 500);
-}
-
-var removeListeners=function(){
-}
+var removeListeners = function () {
+    clearInterval(executable);
+    executable = null;
+};
 
 //message listener for background
-chrome.runtime.onMessage.addListener(function(request, sender, sendResponse)    {
-    if(request.command === 'init'){
+chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
+    if (request.command === 'start') {
         addListeners();
-    }else{
+        shouldHide = true;
+    } else if (request.command === 'stop') {
         removeListeners();
+        shouldHide = false;
+    } else if (request.command === 'adjust') {
+        updateResponseTime(request.responseTime);
+    } else {
+        sendResponse({result: 'failed', error: 'unknown command'});
+        return;
     }
     sendResponse({result: "success"});
+    persistentConfig();
 });
 
+function persistentConfig() {
+    chrome.storage.sync.set({hide: shouldHide, storedResponseTime: responseTime}, function() {
+    });
+}
+
+function updateResponseTime(newTime) {
+    responseTime = newTime;
+    if (executable != null) {
+        removeListeners();
+        addListeners();
+    }
+}
+
 //on init perform based on chrome stroage value
-window.onload=function(){
-    chrome.storage.sync.get('hide', function(data) {
-        if(data.hide){
+window.onload = function () {
+    chrome.storage.sync.get('hide', function (data) {
+        shouldHide = data.hide;
+        if (data.hide) {
             addListeners();
-        }else{
+        } else {
             removeListeners();
         }
     });
-}
+
+    chrome.storage.sync.get('storedResponseTime', function (data) {
+        updateResponseTime(data.storedResponseTime);
+    });
+};
