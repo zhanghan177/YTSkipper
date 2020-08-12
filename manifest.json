@@ -1,8 +1,8 @@
 {
   "name": "YTSkipper",
-  "version": "1.0",
+  "version": "1.1",
   "description": "Skip YouTube ads due to the Brave browser bug!",
-  "permissions": ["declarativeContent", "storage", "alarms", "activeTab"],
+  "permissions": ["declarativeContent", "storage"],
   "background": {
     "scripts": ["background.js"],
     "persistent": false
